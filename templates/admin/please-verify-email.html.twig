@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérification requise{% endblock %}
+
+{% block body %}
+    <h1>Veuillez vérifier votre email</h1>
+    <p>
+        Vous devez vérifier votre adresse email avant d'accéder au dashboard admin.
+    </p>
+
+    <a href="{{ path('app_verify_email') }}">Renvoyer l’email de vérification</a>
+{% endblock %}
