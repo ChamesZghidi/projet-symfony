@@ -1,45 +1,499 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event index{% endblock %}
+{% block title %}Gestion des Événements{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .event-card {
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(0,0,0,0.08);
+            background: white;
+            height: 100%;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+        }
+        .event-image-container {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+        }
+        .event-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .event-card:hover .event-image {
+            transform: scale(1.05);
+        }
+        .event-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255,255,255,0.95);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .event-content {
+            padding: 24px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 12px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .event-description {
+            color: #718096;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 20px;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .event-meta {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #f6f9fc 0%, #f1f5f9 100%);
+            border-radius: 10px;
+        }
+        .meta-item {
+            text-align: center;
+            padding: 8px;
+        }
+        .meta-icon {
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+            color: #4f46e5;
+        }
+        .meta-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        .meta-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1rem;
+        }
+        .event-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            border: none;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            border: none;
+        }
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            border: none;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .empty-state {
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            color: white;
+        }
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 0;
+            margin-bottom: 40px;
+            border-radius: 0 0 20px 20px;
+            color: white;
+        }
+        .stats-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Event index</h1>
+    <!-- En-tête avec statistiques -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-5 fw-bold mb-3">🎉 Gestion des Événements</h1>
+                    <p class="lead mb-0">Organisez et gérez tous vos événements en un seul endroit</p>
+                </div>
+                <div class="col-lg-4 text-lg-end">
+                    <a href="{{ path('app_event_new') }}" class="btn btn-light btn-lg px-4 py-3 rounded-pill fw-bold">
+                        <i class="fas fa-plus-circle me-2"></i>Créer un Événement
+                    </a>
+                </div>
+            </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Event</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>Date</th>
-                <th>Capacity</th>
-                <th>Prix</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for event in events %}
-            <tr>
-                <td>{{ event.id }}</td>
-                <td>{{ event.event }}</td>
-                <td>{{ event.nom }}</td>
-                <td>{{ event.description }}</td>
-                <td>{{ event.date ? event.date|date('Y-m-d') : '' }}</td>
-                <td>{{ event.capacity }}</td>
-                <td>{{ event.prix }}</td>
-                <td>
-                    <a href="{{ path('app_event_show', {'id': event.id}) }}">show</a>
-                    <a href="{{ path('app_event_edit', {'id': event.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="8">no records found</td>
-            </tr>
+            <!-- Statistiques -->
+            <div class="row mt-5">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-calendar-alt fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ events|length }}</h3>
+                                <p class="mb-0">Événements</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ events|reduce((sum, event) => sum + event.capacity, 0) }}</h3>
+                                <p class="mb-0">Places totales</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-euro-sign fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ events|reduce((sum, event) => sum + event.prix, 0)|number_format(2, ',', ' ') }} €</h3>
+                                <p class="mb-0">Valeur totale</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
+                                <i class="fas fa-chart-line fa-2x"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">{{ (events|filter(event => event.date|date('Y-m-d') > 'now'|date('Y-m-d'))|length) }}</h3>
+                                <p class="mb-0">À venir</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container py-5">
+        <!-- Messages de succès -->
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show mb-4 shadow-lg border-0" role="alert">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-3 fs-4"></i>
+                    <div class="flex-grow-1">
+                        <h5 class="alert-heading mb-1">Succès !</h5>
+                        <p class="mb-0">{{ message }}</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
 
-    <a href="{{ path('app_event_new') }}">Create new</a>
+        <!-- Barre de recherche et filtres -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                            <input type="text" class="form-control border-start-0" id="searchInput"
+                                   placeholder="Rechercher un événement...">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-end gap-2">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter me-2"></i>Filtrer
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" data-filter="all">Tous</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="upcoming">À venir</a></li>
+                                    <li><a class="dropdown-item" href="#" data-filter="past">Passés</a></li>
+                                </ul>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                        data-bs-toggle="dropdown">
+                                    <i class="fas fa-sort me-2"></i>Trier
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" data-sort="date">Par date</a></li>
+                                    <li><a class="dropdown-item" href="#" data-sort="name">Par nom</a></li>
+                                    <li><a class="dropdown-item" href="#" data-sort="price">Par prix</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille des événements -->
+        {% if events|length > 0 %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="eventsGrid">
+                {% for event in events %}
+                    <div class="col event-item"
+                         data-name="{{ event.nom|lower }}"
+                         data-date="{{ event.date|date('Y-m-d') }}"
+                         data-price="{{ event.prix }}">
+                        <div class="event-card h-100">
+                            <!-- Image -->
+                            <div class="event-image-container">
+                                {% if event.image %}
+                                    <img src="{{ asset('uploads/images/events/' ~ event.image) }}"
+                                         class="event-image"
+                                         alt="{{ event.nom }}"
+                                         onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=220&fit=crop'">
+                                {% else %}
+                                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=220&fit=crop"
+                                         class="event-image"
+                                         alt="Image par défaut">
+                                {% endif %}
+
+                                <!-- Badge de statut -->
+                                <div class="event-badge">
+                                    {% if event.date|date('Y-m-d') > 'now'|date('Y-m-d') %}
+                                        <span class="text-success">● À venir</span>
+                                    {% else %}
+                                        <span class="text-secondary">● Passé</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Contenu -->
+                            <div class="event-content">
+                                <h3 class="event-title">{{ event.nom }}</h3>
+                                <p class="event-description">{{ event.description }}</p>
+
+                                <!-- Métadonnées -->
+                                <div class="event-meta">
+                                    <div class="meta-item">
+                                        <div class="meta-icon">📅</div>
+                                        <div class="meta-label">Date</div>
+                                        <div class="meta-value">{{ event.date|date('d/m/Y') }}</div>
+                                    </div>
+                                    <div class="meta-item">
+                                        <div class="meta-icon">👥</div>
+                                        <div class="meta-label">Places</div>
+                                        <div class="meta-value">{{ event.capacity }}</div>
+                                    </div>
+                                    <div class="meta-item">
+                                        <div class="meta-icon">💰</div>
+                                        <div class="meta-label">Prix</div>
+                                        <div class="meta-value">{{ event.prix }} €</div>
+                                    </div>
+                                </div>
+
+                                <!-- Actions -->
+                                <div class="event-actions">
+                                    <a href="{{ path('app_event_show', {'id': event.id}) }}"
+                                       class="btn btn-view text-white action-btn">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
+                                    <a href="{{ path('app_event_edit', {'id': event.id}) }}"
+                                       class="btn btn-edit text-white action-btn">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <form method="post"
+                                          action="{{ path('app_event_delete', {'id': event.id}) }}"
+                                          class="d-inline action-btn-form"
+                                          onsubmit="return confirm('Supprimer définitivement « {{ event.nom }} » ?');">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                                        <button type="submit" class="btn btn-delete text-white action-btn w-100">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination (exemple) -->
+            <nav class="mt-5" aria-label="Navigation des événements">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        {% else %}
+            <!-- État vide -->
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-calendar-plus"></i>
+                </div>
+                <h3 class="mb-3">Aucun événement pour le moment</h3>
+                <p class="mb-4">Commencez à créer votre premier événement pour animer votre calendrier !</p>
+                <a href="{{ path('app_event_new') }}" class="btn btn-light btn-lg px-5 rounded-pill">
+                    <i class="fas fa-plus me-2"></i>Créer mon premier événement
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- JavaScript pour les fonctionnalités -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Recherche en temps réel
+            const searchInput = document.getElementById('searchInput');
+            const eventItems = document.querySelectorAll('.event-item');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+
+                    eventItems.forEach(item => {
+                        const eventName = item.dataset.name;
+                        if (eventName.includes(searchTerm)) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // Filtrage
+            const filterButtons = document.querySelectorAll('[data-filter]');
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const filter = this.dataset.filter;
+
+                    eventItems.forEach(item => {
+                        const eventDate = new Date(item.dataset.date);
+                        const today = new Date();
+
+                        switch(filter) {
+                            case 'upcoming':
+                                item.style.display = eventDate >= today ? 'block' : 'none';
+                                break;
+                            case 'past':
+                                item.style.display = eventDate < today ? 'block' : 'none';
+                                break;
+                            default:
+                                item.style.display = 'block';
+                        }
+                    });
+                });
+            });
+
+            // Tri
+            const sortButtons = document.querySelectorAll('[data-sort]');
+            sortButtons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sortBy = this.dataset.sort;
+                    const container = document.getElementById('eventsGrid');
+                    const items = Array.from(container.querySelectorAll('.event-item'));
+
+                    items.sort((a, b) => {
+                        switch(sortBy) {
+                            case 'date':
+                                return new Date(a.dataset.date) - new Date(b.dataset.date);
+                            case 'name':
+                                return a.dataset.name.localeCompare(b.dataset.name);
+                            case 'price':
+                                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                            default:
+                                return 0;
+                        }
+                    });
+
+                    // Réorganiser les éléments
+                    items.forEach(item => container.appendChild(item));
+                });
+            });
+
+            // Animation au survol
+            const cards = document.querySelectorAll('.event-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-8px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
 {% endblock %}

@@ -1,46 +1,591 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Event{% endblock %}
+{% block title %}{{ event.nom }} - Détails{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .detail-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .detail-header {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .detail-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none"><path d="M0,0 L1000,0 L1000,100 L0,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+        .event-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .event-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 2;
+        }
+        .event-status {
+            position: relative;
+            z-index: 2;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        .detail-body {
+            background: white;
+            padding: 0;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .hero-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+        }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 40px;
+            padding: 40px;
+        }
+        .main-content {
+            padding-right: 30px;
+            border-right: 1px solid #e2e8f0;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #8b5cf6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .description-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #4a5568;
+            white-space: pre-line;
+        }
+        .info-cards {
+            display: grid;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .info-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.3s;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+        .info-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .info-card-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+        .info-card-subtext {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+        }
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 25px;
+        }
+        .action-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-action {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+        }
+        .btn-action:hover {
+            transform: translateY(-3px);
+            text-decoration: none;
+        }
+        .btn-edit {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        .btn-edit:hover {
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.3);
+        }
+        .btn-delete {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .btn-delete:hover {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+        .btn-back {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+        .btn-back:hover {
+            background: #e2e8f0;
+            color: #475569;
+            box-shadow: 0 8px 25px rgba(148, 163, 184, 0.2);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(139, 92, 246, 0.1);
+            border-radius: 10px;
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8b5cf6;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .file-info {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px dashed #cbd5e0;
+        }
+        .file-info-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .file-info-content {
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.9rem;
+            color: #475569;
+            word-break: break-all;
+        }
+        .social-share {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+        .social-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.3s;
+        }
+        .social-btn:hover {
+            transform: translateY(-3px);
+        }
+        .btn-facebook { background: #1877f2; }
+        .btn-twitter { background: #1da1f2; }
+        .btn-linkedin { background: #0077b5; }
+        .btn-whatsapp { background: #25d366; }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Event</h1>
+    <div class="detail-wrapper">
+        <!-- En-tête détaillé -->
+        <div class="detail-header">
+            <div class="container">
+                <h1 class="event-title">{{ event.nom }}</h1>
+                <p class="event-subtitle">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    {{ event.date|date('l d F Y')|replace({
+                        'Monday': 'Lundi',
+                        'Tuesday': 'Mardi',
+                        'Wednesday': 'Mercredi',
+                        'Thursday': 'Jeudi',
+                        'Friday': 'Vendredi',
+                        'Saturday': 'Samedi',
+                        'Sunday': 'Dimanche',
+                        'January': 'Janvier',
+                        'February': 'Février',
+                        'March': 'Mars',
+                        'April': 'Avril',
+                        'May': 'Mai',
+                        'June': 'Juin',
+                        'July': 'Juillet',
+                        'August': 'Août',
+                        'September': 'Septembre',
+                        'October': 'Octobre',
+                        'November': 'Novembre',
+                        'December': 'Décembre'
+                    }) }}
+                </p>
+                <div class="event-status">
+                <span class="status-badge">
+                    <i class="fas fa-circle"></i>
+                    {{ event.date|date('Y-m-d') > 'now'|date('Y-m-d') ? 'Événement à venir' : 'Événement passé' }}
+                    • {{ event.capacity }} places • {{ event.prix }} €
+                </span>
+                </div>
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ event.id }}</td>
-            </tr>
-            <tr>
-                <th>Event</th>
-                <td>{{ event.event }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ event.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ event.description }}</td>
-            </tr>
-            <tr>
-                <th>Date</th>
-                <td>{{ event.date ? event.date|date('Y-m-d') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Capacity</th>
-                <td>{{ event.capacity }}</td>
-            </tr>
-            <tr>
-                <th>Prix</th>
-                <td>{{ event.prix }}</td>
-            </tr>
-        </tbody>
-    </table>
+        <!-- Corps du détail -->
+        <div class="detail-body">
+            <!-- Image hero -->
+            {% if event.image %}
+                <img src="{{ asset('uploads/images/events/' ~ event.image) }}"
+                     class="hero-image"
+                     alt="{{ event.nom }}"
+                     onerror="this.src='https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&h=400&fit=crop'">
+            {% else %}
+                <div class="hero-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex; align-items: center; justify-content: center; color: white;">
+                    <div class="text-center">
+                        <i class="fas fa-calendar-alt fa-5x mb-3"></i>
+                        <h3>Aucune image disponible</h3>
+                    </div>
+                </div>
+            {% endif %}
 
-    <a href="{{ path('app_event_index') }}">back to list</a>
+            <!-- Contenu principal -->
+            <div class="content-grid container">
+                <!-- Colonne principale -->
+                <div class="main-content">
+                    <!-- Description -->
+                    <div class="mb-5">
+                        <h3 class="section-title">
+                            <i class="fas fa-align-left"></i> Description
+                        </h3>
+                        <div class="description-content">
+                            {{ event.description|nl2br }}
+                        </div>
+                    </div>
 
-    <a href="{{ path('app_event_edit', {'id': event.id}) }}">edit</a>
+                    <!-- Cartes d'information -->
+                    <div class="info-cards">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-calendar-check"></i> Date
+                                    </div>
+                                    <div class="info-card-value">
+                                        {{ event.date|date('d/m/Y') }}
+                                    </div>
+                                    <div class="info-card-subtext">
+                                        {{ event.date|date('Y-m-d') > 'now'|date('Y-m-d') ? 'Dans ' ~ event.date.diff(date('now')).days ~ ' jours' : 'Il y a ' ~ date('now').diff(event.date).days ~ ' jours' }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-users"></i> Capacité
+                                    </div>
+                                    <div class="info-card-value">
+                                        {{ event.capacity }}
+                                    </div>
+                                    <div class="info-card-subtext">
+                                        places disponibles
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-card">
+                                    <div class="info-card-title">
+                                        <i class="fas fa-tag"></i> Prix
+                                    </div>
+                                    <div class="info-card-value">
+                                        {{ event.prix }} €
+                                    </div>
+                                    <div class="info-card-subtext">
+                                        {{ event.prix == 0 ? 'Événement gratuit' : 'Par personne' }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    {{ include('event/_delete_form.html.twig') }}
+                    <!-- Informations sur l'image -->
+                    {% if event.image %}
+                        <div class="file-info mt-5">
+                            <div class="file-info-title">
+                                <i class="fas fa-file-image"></i> Informations sur l'image
+                            </div>
+                            <div class="file-info-content">
+                                {{ event.image }}
+                            </div>
+                            <div class="mt-3">
+                                <a href="{{ asset('uploads/images/events/' ~ event.image) }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-2"></i>Ouvrir l'image
+                                </a>
+                                <a href="{{ asset('uploads/images/events/' ~ event.image) }}"
+                                   download
+                                   class="btn btn-sm btn-outline-secondary ms-2">
+                                    <i class="fas fa-download me-2"></i>Télécharger
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <!-- Actions -->
+                    <div class="action-card">
+                        <h4 class="action-card-title">
+                            <i class="fas fa-cogs"></i> Actions
+                        </h4>
+                        <a href="{{ path('app_event_edit', {'id': event.id}) }}"
+                           class="btn-action btn-edit">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <form method="post"
+                              action="{{ path('app_event_delete', {'id': event.id}) }}"
+                              onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement cet événement ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ event.id) }}">
+                            <button type="submit" class="btn-action btn-delete w-100">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </button>
+                        </form>
+                        <a href="{{ path('app_event_index') }}"
+                           class="btn-action btn-back">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="action-card">
+                        <h4 class="action-card-title">
+                            <i class="fas fa-chart-bar"></i> Statistiques
+                        </h4>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-value">{{ event.id }}</div>
+                                <div class="stat-label">ID</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    {% if event.image %}
+                                        <i class="fas fa-check text-success"></i>
+                                    {% else %}
+                                        <i class="fas fa-times text-danger"></i>
+                                    {% endif %}
+                                </div>
+                                <div class="stat-label">Image</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">
+                                    {{ event.description|length }}
+                                </div>
+                                <div class="stat-label">Caractères</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Partage social -->
+                    <div class="action-card">
+                        <h4 class="action-card-title">
+                            <i class="fas fa-share-alt"></i> Partager
+                        </h4>
+                        <div class="social-share">
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ app.request.uri }}"
+                               target="_blank"
+                               class="social-btn btn-facebook">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://twitter.com/intent/tweet?text={{ event.nom|url_encode }}&url={{ app.request.uri }}"
+                               target="_blank"
+                               class="social-btn btn-twitter">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ app.request.uri }}&title={{ event.nom|url_encode }}"
+                               target="_blank"
+                               class="social-btn btn-linkedin">
+                                <i class="fab fa-linkedin-in"></i>
+                            </a>
+                            <a href="https://wa.me/?text={{ event.nom|url_encode }}%20{{ app.request.uri }}"
+                               target="_blank"
+                               class="social-btn btn-whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Code QR -->
+                    <div class="action-card">
+                        <h4 class="action-card-title">
+                            <i class="fas fa-qrcode"></i> Code QR
+                        </h4>
+                        <div class="text-center">
+                            <div id="qrcode" style="width: 200px; height: 200px; margin: 0 auto;"></div>
+                            <p class="text-muted small mt-2">Scannez pour accéder à cette page</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript pour les fonctionnalités avancées -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Générer le code QR
+            const qrcodeDiv = document.getElementById('qrcode');
+            if (qrcodeDiv) {
+                const currentUrl = window.location.href;
+                QRCode.toCanvas(qrcodeDiv, currentUrl, {
+                    width: 200,
+                    height: 200,
+                    color: {
+                        dark: '#8b5cf6',
+                        light: '#ffffff'
+                    }
+                }, function(error) {
+                    if (error) console.error(error);
+                });
+            }
+
+            // Animation des cartes au survol
+            const infoCards = document.querySelectorAll('.info-card');
+            infoCards.forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-5px)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Confirmation de suppression améliorée
+            const deleteForm = document.querySelector('form[action*="delete"]');
+            if (deleteForm) {
+                deleteForm.addEventListener('submit', function(e) {
+                    if (!confirm('⚠️ Cette action est irréversible !\n\nÊtes-vous sûr de vouloir supprimer cet événement ?')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            }
+
+            // Copier l'URL dans le presse-papier
+            const copyUrlBtn = document.querySelector('.copy-url');
+            if (copyUrlBtn) {
+                copyUrlBtn.addEventListener('click', function() {
+                    const url = window.location.href;
+                    navigator.clipboard.writeText(url).then(() => {
+                        const originalText = this.innerHTML;
+                        this.innerHTML = '<i class="fas fa-check"></i> Copié !';
+                        setTimeout(() => {
+                            this.innerHTML = originalText;
+                        }, 2000);
+                    });
+                });
+            }
+
+            // Gestion responsive
+            function handleResponsive() {
+                if (window.innerWidth < 992) {
+                    document.querySelector('.content-grid').style.gridTemplateColumns = '1fr';
+                    document.querySelector('.main-content').style.borderRight = 'none';
+                    document.querySelector('.main-content').style.paddingRight = '0';
+                    document.querySelector('.sidebar').style.position = 'static';
+                } else {
+                    document.querySelector('.content-grid').style.gridTemplateColumns = '1fr 400px';
+                    document.querySelector('.main-content').style.borderRight = '1px solid #e2e8f0';
+                    document.querySelector('.main-content').style.paddingRight = '30px';
+                    document.querySelector('.sidebar').style.position = 'sticky';
+                }
+            }
+
+            handleResponsive();
+            window.addEventListener('resize', handleResponsive);
+        });
+    </script>
 {% endblock %}

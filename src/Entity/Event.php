@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\EventRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -13,39 +14,45 @@ class Event
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $event = null;
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $image = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le nom ne peut pas être vide")]
     private ?string $nom = null;
 
     #[ORM\Column(length: 1000)]
+    #[Assert\NotBlank(message: "La description ne peut pas être vide")]
     private ?string $description = null;
 
     #[ORM\Column(type: "date")]
+    #[Assert\NotBlank(message: "La date ne peut pas être vide")]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column]
+    #[Assert\NotBlank(message: "La capacité ne peut pas être vide")]
+    #[Assert\Positive(message: "La capacité doit être un nombre positif")]
     private ?int $capacity = null;
 
     #[ORM\Column(type: "float")]
+    #[Assert\NotBlank(message: "Le prix ne peut pas être vide")]
+    #[Assert\PositiveOrZero(message: "Le prix doit être positif ou zéro")]
     private ?float $prix = null;
 
     // --- Getters et Setters ---
-
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getEvent(): ?string
+    public function getImage(): ?string
     {
-        return $this->event;
+        return $this->image;
     }
 
-    public function setEvent(string $event): static
+    public function setImage(?string $image): static
     {
-        $this->event = $event;
+        $this->image = $image;
         return $this;
     }
 

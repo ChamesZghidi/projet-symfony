@@ -1,11 +1,448 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Event{% endblock %}
+{% block title %}Créer un Événement{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .form-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .form-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        .form-header h1 {
+            font-weight: 800;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .form-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        .form-body {
+            background: white;
+            padding: 40px;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            background: #f8fafc;
+            border-left: 5px solid #4f46e5;
+        }
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 16px;
+            transition: all 0.3s;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        .file-upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+        .file-upload-area:hover {
+            border-color: #4f46e5;
+            background: #f1f5f9;
+        }
+        .file-upload-area.dragover {
+            border-color: #4f46e5;
+            background: #e0e7ff;
+        }
+        .upload-icon {
+            font-size: 3rem;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        .file-info {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .image-preview {
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 30px;
+            border-top: 1px solid #e2e8f0;
+            margin-top: 40px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            color: white;
+            padding: 14px 40px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+        }
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #64748b;
+            padding: 14px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-cancel:hover {
+            background: #e2e8f0;
+            color: #475569;
+            transform: translateY(-2px);
+        }
+        .character-count {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            text-align: right;
+            margin-top: 5px;
+        }
+        .character-count.warning {
+            color: #f59e0b;
+        }
+        .character-count.danger {
+            color: #ef4444;
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-    <h1>Create new Event</h1>
+    <div class="container py-5">
+        <div class="form-wrapper">
+            <!-- En-tête du formulaire -->
+            <div class="form-header">
+                <h1>🎯 Créer un Nouvel Événement</h1>
+                <p>Remplissez les informations ci-dessous pour organiser votre événement</p>
+            </div>
 
-    {{ include('event/_form.html.twig') }}
+            <!-- Corps du formulaire -->
+            <div class="form-body">
+                {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
 
-    <a href="{{ path('app_event_index') }}">back to list</a>
+                <!-- Section Informations de base -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-info-circle"></i> Informations de base
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8 mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-heading"></i> Nom de l'événement
+                            </label>
+                            {{ form_widget(form.nom, {'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Ex: Conférence sur l\'IA 2024',
+                                'oninput': 'updateCharacterCount(this, 255)'
+                            }}) }}
+                            <div class="character-count" id="nomCount">0/255 caractères</div>
+                            {{ form_errors(form.nom) }}
+                        </div>
+
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-day"></i> Date
+                            </label>
+                            {{ form_widget(form.date, {'attr': {
+                                'class': 'form-control'
+                            }}) }}
+                            {{ form_errors(form.date) }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-users"></i> Capacité maximale
+                            </label>
+                            {{ form_widget(form.capacity, {'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Ex: 100',
+                                'min': '1'
+                            }}) }}
+                            {{ form_errors(form.capacity) }}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-tag"></i> Prix d'entrée
+                            </label>
+                            <div class="input-group">
+                                {{ form_widget(form.prix, {'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': '0.00',
+                                    'step': '0.01',
+                                    'min': '0'
+                                }}) }}
+                                <span class="input-group-text">€</span>
+                            </div>
+                            {{ form_errors(form.prix) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Description -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-align-left"></i> Description détaillée
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-file-alt"></i> Description de l'événement
+                        </label>
+                        {{ form_widget(form.description, {'attr': {
+                            'class': 'form-control',
+                            'rows': '6',
+                            'placeholder': 'Décrivez en détail votre événement, les activités prévues, les intervenants, etc...',
+                            'oninput': 'updateCharacterCount(this, 1000)'
+                        }}) }}
+                        <div class="character-count" id="descriptionCount">0/1000 caractères</div>
+                        {{ form_errors(form.description) }}
+                    </div>
+                </div>
+
+                <!-- Section Image -->
+                <div class="form-section">
+                    <div class="section-title">
+                        <i class="fas fa-image"></i> Visuel de l'événement
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">
+                            <i class="fas fa-upload"></i> Image principale
+                        </label>
+
+                        <!-- Zone de drag & drop -->
+                        <div class="file-upload-area" id="dropArea">
+                            <div class="upload-icon">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                            </div>
+                            <h5>Glissez-déposez votre image ici</h5>
+                            <p class="text-muted">ou cliquez pour parcourir vos fichiers</p>
+                            <p class="small text-muted mb-0">Formats supportés: JPG, PNG, GIF, WebP • Max 5Mo</p>
+
+                            {{ form_widget(form.imageFile, {'attr': {
+                                'class': 'd-none',
+                                'id': 'fileInput'
+                            }}) }}
+
+                            <div class="file-info" id="fileInfo">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-file-image text-primary me-3"></i>
+                                    <div class="flex-grow-1">
+                                        <p class="mb-1" id="fileName"></p>
+                                        <p class="mb-0 text-muted small" id="fileSize"></p>
+                                    </div>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile()">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Prévisualisation -->
+                        <div class="image-preview" id="imagePreview">
+                            <img id="previewImage" class="img-fluid w-100">
+                        </div>
+
+                        {{ form_errors(form.imageFile) }}
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <a href="{{ path('app_event_index') }}" class="btn-cancel">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-rocket"></i> Créer l'événement
+                    </button>
+                </div>
+
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript amélioré -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropArea = document.getElementById('dropArea');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+
+            // Gestion du drag & drop
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                dropArea.classList.add('dragover');
+            }
+
+            function unhighlight() {
+                dropArea.classList.remove('dragover');
+            }
+
+            // Gestion du drop
+            dropArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect(files[0]);
+                }
+            }
+
+            // Gestion du clic
+            dropArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Gestion du changement de fichier
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    handleFileSelect(this.files[0]);
+                }
+            });
+
+            // Fonction pour gérer le fichier sélectionné
+            function handleFileSelect(file) {
+                // Validation
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                const maxSize = 5 * 1024 * 1024; // 5MB
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Format de fichier non supporté. Veuillez choisir une image (JPG, PNG, GIF, WebP).');
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert('Fichier trop volumineux. La taille maximale est de 5MB.');
+                    return;
+                }
+
+                // Afficher les infos du fichier
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileInfo.style.display = 'block';
+
+                // Prévisualisation
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImage.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Supprimer le fichier
+            window.removeFile = function() {
+                fileInput.value = '';
+                fileInfo.style.display = 'none';
+                imagePreview.style.display = 'none';
+            };
+
+            // Formater la taille du fichier
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Compteur de caractères
+            window.updateCharacterCount = function(input, max) {
+                const count = input.value.length;
+                const counter = document.getElementById(input.id + 'Count');
+                if (counter) {
+                    counter.textContent = `${count}/${max} caractères`;
+                    counter.className = 'character-count';
+                    if (count > max * 0.8) counter.classList.add('warning');
+                    if (count > max * 0.95) counter.classList.add('danger');
+                }
+            };
+
+            // Initialiser les compteurs
+            const nomInput = document.querySelector('#{{ form.nom.vars.id }}');
+            const descInput = document.querySelector('#{{ form.description.vars.id }}');
+            if (nomInput) updateCharacterCount(nomInput, 255);
+            if (descInput) updateCharacterCount(descInput, 1000);
+        });
+    </script>
 {% endblock %}
